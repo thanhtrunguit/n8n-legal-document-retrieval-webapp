@@ -29,14 +29,20 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: question })
         })
-            .then(response => response.json())
-            .then(data => {
+        .then(response => response.json())
+        .then(data => {
+            console.log("Response from n8n:", data); // Debugging: Log the received data
+            if (data.documents) {
                 responseDiv.innerHTML = "<h3>Relevant Documents:</h3>" +
                     data.documents.map(doc => `<p>${doc}</p>`).join("");
-            })
-            .catch(error => {
-                responseDiv.innerHTML = "Error retrieving documents.";
-            });
+            } else {
+                responseDiv.innerHTML = "No documents found.";
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error); // Debugging: Log any errors
+            responseDiv.innerHTML = "Error retrieving documents.";
+        });
     });
 </script>
 </body>
