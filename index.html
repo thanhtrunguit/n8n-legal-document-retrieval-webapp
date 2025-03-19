@@ -13,7 +13,13 @@
         .input-container { display: flex; width: 100%; max-width: 600px; margin-top: 10px; }
         input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
         button { padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
-        .loading { font-style: italic; color: gray; }
+        .typing { font-style: italic; color: gray; animation: typingDots 1.5s infinite; }
+        @keyframes typingDots {
+            0% { content: "Typing"; }
+            33% { content: "Typing."; }
+            66% { content: "Typing.."; }
+            100% { content: "Typing..."; }
+        }
     </style>
 </head>
 <body>
@@ -35,12 +41,18 @@
             document.getElementById("questionInput").value = "";
             chatDiv.scrollTop = chatDiv.scrollHeight;
 
-            // Show loading message
-            const loadingMessage = document.createElement("div");
-            loadingMessage.className = "message bot loading";
-            loadingMessage.innerText = "Typing...";
-            chatDiv.appendChild(loadingMessage);
+            // Add typing animation
+            const typingMessage = document.createElement("div");
+            typingMessage.className = "message bot typing";
+            typingMessage.innerText = "Typing";
+            chatDiv.appendChild(typingMessage);
             chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            let dotCount = 0;
+            const typingInterval = setInterval(() => {
+                dotCount = (dotCount + 1) % 4;
+                typingMessage.innerText = "Typing" + ".".repeat(dotCount);
+            }, 500);
 
             fetch("https://noble-coyote-measured.ngrok-free.app/webhook/8e9405e9-c585-4fbb-9bf0-99397fa8682c", {
                 method: "POST",
@@ -49,16 +61,16 @@
             })
             .then(response => response.json())
             .then(data => {
-                console.log("Response from n8n:", data);
-                chatDiv.removeChild(loadingMessage); // Remove loading message
+                clearInterval(typingInterval);
+                chatDiv.removeChild(typingMessage); // Remove typing animation
 
                 const botMessage = `<div class='message bot'>${data.documents ? data.documents.map(doc => `<p>${doc}</p>`).join("") : "No documents found."}</div>`;
                 chatDiv.innerHTML += botMessage;
                 chatDiv.scrollTop = chatDiv.scrollHeight;
             })
             .catch(error => {
-                console.error("Error:", error);
-                chatDiv.removeChild(loadingMessage); // Remove loading message if error occurs
+                clearInterval(typingInterval);
+                chatDiv.removeChild(typingMessage); // Remove typing animation if error occurs
                 chatDiv.innerHTML += `<div class='message bot'>Error retrieving documents.</div>`;
                 chatDiv.scrollTop = chatDiv.scrollHeight;
             });
