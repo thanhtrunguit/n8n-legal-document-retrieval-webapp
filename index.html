@@ -113,14 +113,14 @@
       document.getElementById("questionInput").value = "";
       chatDiv.scrollTop = chatDiv.scrollHeight;
       
-      // Add bouncing dots animation while waiting for the response
+      // Add bouncing dots animation while waiting for response
       const typingMessage = document.createElement("div");
       typingMessage.className = "message bot typing";
       typingMessage.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
       chatDiv.appendChild(typingMessage);
       chatDiv.scrollTop = chatDiv.scrollHeight;
       
-      // Send request to n8n; n8n returns formatted HTML in data.formattedText
+      // Fetch the formatted response from n8n
       fetch("https://noble-coyote-measured.ngrok-free.app/webhook/8e9405e9-c585-4fbb-9bf0-99397fa8682c", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -128,16 +128,18 @@
       })
       .then(response => response.json())
       .then(data => {
-        chatDiv.removeChild(typingMessage); // Remove the loading animation
+        console.log("Received data:", data);
+        chatDiv.removeChild(typingMessage); // Remove loading animation
         
         const botMessageDiv = document.createElement("div");
         botMessageDiv.className = "message bot";
-        // Directly insert the preformatted HTML from n8n
-        botMessageDiv.innerHTML = data.formattedText;
+        // Use the first element in the "documents" array as the formatted HTML
+        botMessageDiv.innerHTML = data.documents && data.documents.length ? data.documents[0] : "<p>No formatted text returned.</p>";
         chatDiv.appendChild(botMessageDiv);
         chatDiv.scrollTop = chatDiv.scrollHeight;
       })
       .catch(error => {
+        console.error("Error:", error);
         chatDiv.removeChild(typingMessage);
         chatDiv.innerHTML += `<div class='message bot'>Error retrieving documents.</div>`;
         chatDiv.scrollTop = chatDiv.scrollHeight;
