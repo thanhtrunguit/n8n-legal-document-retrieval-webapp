@@ -120,7 +120,6 @@
       chatDiv.appendChild(typingMessage);
       chatDiv.scrollTop = chatDiv.scrollHeight;
       
-      // Fetch the formatted response from n8n
       fetch("https://noble-coyote-measured.ngrok-free.app/webhook/8e9405e9-c585-4fbb-9bf0-99397fa8682c", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -133,10 +132,34 @@
         
         const botMessageDiv = document.createElement("div");
         botMessageDiv.className = "message bot";
-        // Use the first element in the "documents" array as the formatted HTML
-        botMessageDiv.innerHTML = data.documents && data.documents.length ? data.documents[0] : "<p>No formatted text returned.</p>";
+        // Get the formatted HTML from n8n. In your case, data.documents is an array.
+        const finalHTML = (data.documents && data.documents.length) ? data.documents[0] : "<p>No formatted text returned.</p>";
+        
+        // Create a temporary element to extract plain text for typewriter effect.
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = finalHTML;
+        const plainText = tempDiv.innerText || tempDiv.textContent;
+        
+        // We'll type word by word using the plain text
+        let words = plainText.split(" ");
+        let index = 0;
+        botMessageDiv.innerHTML = ""; // start empty
         chatDiv.appendChild(botMessageDiv);
         chatDiv.scrollTop = chatDiv.scrollHeight;
+        
+        function typeNextWord() {
+          if (index < words.length) {
+            // Append next word followed by a space
+            botMessageDiv.innerHTML += words[index] + " ";
+            index++;
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+            setTimeout(typeNextWord, 40); // 40ms per word
+          } else {
+            // Once done, replace the content with fully formatted HTML to restore formatting
+            botMessageDiv.innerHTML = finalHTML;
+          }
+        }
+        typeNextWord();
       })
       .catch(error => {
         console.error("Error:", error);
