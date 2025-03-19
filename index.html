@@ -53,7 +53,7 @@
             document.getElementById("questionInput").value = "";
             chatDiv.scrollTop = chatDiv.scrollHeight;
 
-            // Add bouncing dot animation
+            // Add bouncing dots animation
             const typingMessage = document.createElement("div");
             typingMessage.className = "message bot typing";
             typingMessage.innerHTML = `<span class="dot"></span><span class="dot"></span><span class="dot"></span>`;
@@ -74,7 +74,7 @@
                 chatDiv.appendChild(botMessageDiv);
                 chatDiv.scrollTop = chatDiv.scrollHeight;
 
-                let responseText = data.documents ? data.documents.join(" ") : "No documents found.";
+                let responseText = data.documents ? formatResponse(data.documents.join(" ")) : "<p>No documents found.</p>";
                 let words = responseText.split(" ");
                 let index = 0;
 
@@ -95,6 +95,14 @@
                 chatDiv.scrollTop = chatDiv.scrollHeight;
             });
         });
+
+        function formatResponse(text) {
+            return text
+                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // Bold **text**
+                .replace(/\n\* (.*?)\n/g, "<ul><li>$1</li></ul>")  // List items * item
+                .replace(/\n\* (.*?)\n\*/g, "<ul><li>$1</li></ul>") // Nested lists
+                .replace(/\n/g, "<br>"); // Preserve line breaks
+        }
     </script>
 </body>
 </html>
