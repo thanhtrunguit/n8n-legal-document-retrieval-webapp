@@ -65,8 +65,19 @@
                 chatDiv.scrollTop = chatDiv.scrollHeight;
 
                 let responseText = data.documents ? formatResponse(data.documents.join(" ")) : "<p>No documents found.</p>";
-                botMessageDiv.innerHTML = responseText;
-                chatDiv.scrollTop = chatDiv.scrollHeight;
+                let words = responseText.split(" ");
+                let index = 0;
+
+                function typeNextWord() {
+                    if (index < words.length) {
+                        botMessageDiv.innerHTML += words[index] + " ";
+                        index++;
+                        chatDiv.scrollTop = chatDiv.scrollHeight;
+                        setTimeout(typeNextWord, 40); // Speed: 40ms per word
+                    }
+                }
+
+                typeNextWord();
             })
             .catch(error => {
                 chatDiv.removeChild(typingMessage); // Remove bouncing dots
@@ -78,17 +89,23 @@
         function formatResponse(text) {
             // Convert bold text (**bold** → <strong>bold</strong>)
             text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-            
-            // Convert bullet points (* text → <ul><li>text</li></ul>)
-            text = text.replace(/\n\s*\*\s(.*?)/g, "<li>$1</li>");
 
-            // Ensure all <li> elements are wrapped in a <ul>
+            // Convert bullet points (*   text → <ul><li>text</li></ul>)
+            text = text.replace(/\n\n\*\s+(.*?)(?=\n|$)/g, "<li>$1</li>");
+
+            // Wrap bullet points in <ul> if there are any <li> elements
             if (text.includes("<li>")) {
                 text = text.replace(/(<li>[\s\S]*?<\/li>)/g, "<ul>$1</ul>");
             }
 
-            // Convert new lines (\n) to <br> while keeping lists intact
-            text = text.replace(/\n/g, "<br>");
+            // Convert double new lines (\n\n) to paragraph breaks (<p>)
+            text = text.replace(/\n\n/g, "</p><p>");
+
+            // Convert remaining single new lines (\n) to <br>, except inside lists
+            text = text.replace(/\n(?!<\/li>)/g, "<br>");
+
+            // Ensure the text is wrapped in <p> tags
+            text = `<p>${text}</p>`.replace(/<p><\/p>/g, ""); // Remove empty <p> tags
 
             return text;
         }
