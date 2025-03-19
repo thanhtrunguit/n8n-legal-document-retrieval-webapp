@@ -7,12 +7,13 @@
     <style>
         body { font-family: Arial, sans-serif; background-color: #f9f9f9; display: flex; flex-direction: column; align-items: center; height: 100vh; }
         .chat-container { width: 100%; max-width: 600px; height: 80vh; overflow-y: auto; padding: 20px; background: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; }
-        .message { padding: 10px; margin: 5px; border-radius: 10px; max-width: 70%; }
+        .message { padding: 10px; margin: 5px; border-radius: 10px; max-width: 80%; word-wrap: break-word; }
         .user { background-color: #007bff; color: white; align-self: flex-end; text-align: right; }
         .bot { background-color: #e9ecef; align-self: flex-start; text-align: left; }
         .input-container { display: flex; width: 100%; max-width: 600px; margin-top: 10px; }
         input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
         button { padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .loading { font-style: italic; color: gray; }
     </style>
 </head>
 <body>
@@ -27,10 +28,18 @@
         document.getElementById("sendBtn").addEventListener("click", function() {
             const question = document.getElementById("questionInput").value;
             if (!question.trim()) return;
+            
             const chatDiv = document.getElementById("chat");
             const userMessage = `<div class='message user'>${question}</div>`;
             chatDiv.innerHTML += userMessage;
             document.getElementById("questionInput").value = "";
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+
+            // Show loading message
+            const loadingMessage = document.createElement("div");
+            loadingMessage.className = "message bot loading";
+            loadingMessage.innerText = "Typing...";
+            chatDiv.appendChild(loadingMessage);
             chatDiv.scrollTop = chatDiv.scrollHeight;
 
             fetch("https://noble-coyote-measured.ngrok-free.app/webhook/8e9405e9-c585-4fbb-9bf0-99397fa8682c", {
@@ -41,12 +50,15 @@
             .then(response => response.json())
             .then(data => {
                 console.log("Response from n8n:", data);
+                chatDiv.removeChild(loadingMessage); // Remove loading message
+
                 const botMessage = `<div class='message bot'>${data.documents ? data.documents.map(doc => `<p>${doc}</p>`).join("") : "No documents found."}</div>`;
                 chatDiv.innerHTML += botMessage;
                 chatDiv.scrollTop = chatDiv.scrollHeight;
             })
             .catch(error => {
                 console.error("Error:", error);
+                chatDiv.removeChild(loadingMessage); // Remove loading message if error occurs
                 chatDiv.innerHTML += `<div class='message bot'>Error retrieving documents.</div>`;
                 chatDiv.scrollTop = chatDiv.scrollHeight;
             });
