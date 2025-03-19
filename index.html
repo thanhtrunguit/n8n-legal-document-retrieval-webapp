@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Law Chat</title>
+  <title>Chat</title>
   <style>
     body { 
       font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
@@ -169,4 +169,33 @@
         tempDiv.innerHTML = finalHTML;
         const plainText = tempDiv.innerText || tempDiv.textContent;
         
-        // Type out the pl
+        // Type out the plain text word by word at 40ms per word.
+        let words = plainText.split(" ");
+        let index = 0;
+        botMessageDiv.innerHTML = "";
+        chatDiv.appendChild(botMessageDiv);
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+        
+        function typeNextWord() {
+          if (index < words.length) {
+            botMessageDiv.innerHTML += words[index] + " ";
+            index++;
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+            setTimeout(typeNextWord, 40);
+          } else {
+            // Once done, replace the typed text with fully formatted HTML.
+            botMessageDiv.innerHTML = finalHTML;
+          }
+        }
+        typeNextWord();
+      })
+      .catch(error => {
+        console.error("Error:", error);
+        chatDiv.removeChild(typingMessage);
+        chatDiv.innerHTML += `<div class='message bot'>Error retrieving documents.</div>`;
+        chatDiv.scrollTop = chatDiv.scrollHeight;
+      });
+    });
+  </script>
+</body>
+</html>
