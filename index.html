@@ -6,29 +6,30 @@
   <title>Chat</title>
   <style>
     body { 
-      font-family: Arial, sans-serif; 
+      font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
       background-color: #f9f9f9; 
       display: flex; 
       flex-direction: column; 
       align-items: center; 
       height: 100vh; 
+      margin: 0;
     }
     .chat-container { 
       width: 100%; 
       max-width: 600px; 
-      height: 80vh; 
+      height: calc(100vh - 120px);
       overflow-y: auto; 
       padding: 20px; 
       background: white; 
-      border-radius: 10px; 
+      border-radius: 8px; 
       box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
       display: flex; 
       flex-direction: column; 
     }
     .message { 
       padding: 10px; 
-      margin: 5px; 
-      border-radius: 10px; 
+      margin: 5px 0; 
+      border-radius: 8px; 
       max-width: 80%; 
       word-wrap: break-word; 
     }
@@ -44,24 +45,32 @@
       text-align: left; 
     }
     .input-container { 
-      display: flex; 
       width: 100%; 
       max-width: 600px; 
-      margin-top: 10px; 
-    }
-    input { 
-      flex: 1; 
-      padding: 10px; 
+      margin: 10px auto; 
+      display: flex; 
       border: 1px solid #ccc; 
-      border-radius: 5px; 
+      border-radius: 8px; 
+      background-color: #f7f7f7;
+      overflow: hidden;
     }
-    button { 
-      padding: 10px; 
-      background-color: #007bff; 
-      color: white; 
+    .input-container textarea { 
+      flex: 1; 
+      padding: 12px; 
+      font-size: 16px; 
       border: none; 
-      border-radius: 5px; 
+      resize: none; 
+      outline: none; 
+      background: transparent;
+    }
+    .input-container button { 
+      background-color: #11a37f; 
+      border: none; 
+      color: white; 
+      padding: 0 20px; 
+      font-size: 16px; 
       cursor: pointer; 
+      border-left: 1px solid #ccc;
     }
     /* Bouncing dots animation */
     .typing { 
@@ -98,11 +107,17 @@
   <h2>Chat</h2>
   <div class="chat-container" id="chat"></div>
   <div class="input-container">
-    <input type="text" id="questionInput" placeholder="Enter your question" required>
+    <textarea id="questionInput" placeholder="Send a message..." rows="1"></textarea>
     <button id="sendBtn">Send</button>
   </div>
-
   <script>
+    // Auto-resize the textarea on input
+    const textarea = document.getElementById("questionInput");
+    textarea.addEventListener("input", function() {
+      this.style.height = "auto";
+      this.style.height = this.scrollHeight + "px";
+    });
+    
     document.getElementById("sendBtn").addEventListener("click", function() {
       const question = document.getElementById("questionInput").value;
       if (!question.trim()) return;
@@ -120,6 +135,7 @@
       chatDiv.appendChild(typingMessage);
       chatDiv.scrollTop = chatDiv.scrollHeight;
       
+      // Fetch the formatted response from n8n
       fetch("https://noble-coyote-measured.ngrok-free.app/webhook/8e9405e9-c585-4fbb-9bf0-99397fa8682c", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -132,7 +148,6 @@
         
         const botMessageDiv = document.createElement("div");
         botMessageDiv.className = "message bot";
-        // Get the formatted HTML from n8n. In your case, data.documents is an array.
         const finalHTML = (data.documents && data.documents.length) ? data.documents[0] : "<p>No formatted text returned.</p>";
         
         // Create a temporary element to extract plain text for typewriter effect.
@@ -140,22 +155,21 @@
         tempDiv.innerHTML = finalHTML;
         const plainText = tempDiv.innerText || tempDiv.textContent;
         
-        // We'll type word by word using the plain text
+        // Type out the plain text word by word at 40ms per word.
         let words = plainText.split(" ");
         let index = 0;
-        botMessageDiv.innerHTML = ""; // start empty
+        botMessageDiv.innerHTML = "";
         chatDiv.appendChild(botMessageDiv);
         chatDiv.scrollTop = chatDiv.scrollHeight;
         
         function typeNextWord() {
           if (index < words.length) {
-            // Append next word followed by a space
             botMessageDiv.innerHTML += words[index] + " ";
             index++;
             chatDiv.scrollTop = chatDiv.scrollHeight;
-            setTimeout(typeNextWord, 40); // 40ms per word
+            setTimeout(typeNextWord, 40);
           } else {
-            // Once done, replace the content with fully formatted HTML to restore formatting
+            // Once done, replace the typed text with the fully formatted HTML.
             botMessageDiv.innerHTML = finalHTML;
           }
         }
