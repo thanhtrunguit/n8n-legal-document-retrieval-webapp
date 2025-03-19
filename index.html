@@ -97,12 +97,19 @@
         });
 
         function formatResponse(text) {
-            return text
-                .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")  // Bold **text**
-                .replace(/\n\* (.*?)\n/g, "<ul><li>$1</li></ul>")  // List items * item
-                .replace(/\n\* (.*?)\n\*/g, "<ul><li>$1</li></ul>") // Nested lists
-                .replace(/\n/g, "<br>"); // Preserve line breaks
+            // Preserve bold text (**bold** → <strong>bold</strong>)
+            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+        
+            // Convert bullet points (* item → <ul><li>item</li></ul>)
+            text = text.replace(/\n\* (.*?)\n/g, "<ul><li>$1</li></ul>");
+            text = text.replace(/\n\* (.*?)$/g, "<ul><li>$1</li></ul>"); // Fixes last bullet point
+        
+            // Convert new lines to <br> to maintain structure
+            text = text.replace(/\n/g, "<br>");
+        
+            return text;
         }
+
     </script>
 </body>
 </html>
