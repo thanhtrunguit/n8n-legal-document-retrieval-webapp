@@ -15,6 +15,12 @@
             display: flex;
             flex-direction: column;
         }
+        /* Header */
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
         /* Chat container: centered, scrollable, with a max height */
         .chat-container {
             flex: 1;
@@ -55,8 +61,8 @@
             text-align: left;
             line-height: 1.8; /* Increased line spacing */
         }
-        /* Fixed unified input container at the bottom */
-        .input-container {
+        /* Bottom container that holds input bar and disclaimer */
+        .bottom-container {
             position: fixed;
             bottom: 20px;
             left: 50%;
@@ -64,12 +70,17 @@
             width: 90%;
             max-width: 720px;
             box-sizing: border-box;
-            display: flex;
-            align-items: flex-end;
+        }
+        /* Fixed unified input container (inside the bottom container) */
+        .input-container {
+            position: relative;
+            width: 100%;
             background: #f7f7f7;
             border: 2px solid #ccc;
             border-radius: 15px;
             padding: 8px;
+            display: flex;
+            align-items: flex-end;
         }
         .input-container textarea {
             width: calc(100% - 70px); /* Leave space for send button */
@@ -103,6 +114,13 @@
             height: 40px;
             fill: white;
         }
+        /* Disclaimer styling */
+        .disclaimer {
+            text-align: center;
+            font-size: 12px;
+            color: gray;
+            margin-top: 5px;
+        }
         /* Typing animation (bouncing dots) */
         .typing {
             display: flex;
@@ -132,11 +150,6 @@
                 opacity: 1;
             }
         }
-        h1 {
-            text-align: center;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
@@ -144,16 +157,21 @@
 <!-- Chat container for messages -->
 <div class="chat-container" id="chat"></div>
 
-<!-- Fixed unified input container at the bottom -->
-<div class="input-container">
-    <textarea id="questionInput" placeholder="Send a message..." rows="2"></textarea>
-    <button id="sendBtn">
-        <!-- Upward arrow icon (using inline SVG) -->
-        <svg viewBox="0 0 24 24" fill="white">
-            <path d="M12 4 L6 10 H18 Z" />
-            <rect x="10.5" y="8" width="3" height="10" rx="1" />
-        </svg>
-    </button>
+<!-- Bottom container holds both the input bar and the disclaimer -->
+<div class="bottom-container">
+    <div class="input-container">
+        <textarea id="questionInput" placeholder="Send a message..." rows="2"></textarea>
+        <button id="sendBtn">
+            <!-- Upward arrow icon (using inline SVG) -->
+            <svg viewBox="0 0 24 24" fill="white">
+                <path d="M12 4 L6 10 H18 Z" />
+                <rect x="10.5" y="8" width="3" height="10" rx="1" />
+            </svg>
+        </button>
+    </div>
+    <div class="disclaimer">
+        Law Chat can make mistakes. Check important info.
+    </div>
 </div>
 
 <script>
